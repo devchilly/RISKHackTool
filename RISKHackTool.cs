@@ -15,7 +15,7 @@ namespace RISKHackTool
             int dwSize, out IntPtr lpNumberOfBytesRead);
 
         const int MAX_BUFFER_SIZE = 100;
-        const int MAX_SCROLL_SIZE = 1000;
+        const int MAX_SCROLL_SIZE = 5000;
 
         Dictionary<String, IntPtr> territoryNamesToAdresses = new Dictionary<String, IntPtr>();
         IntPtr addrOfTerritoriesList = IntPtr.Zero;

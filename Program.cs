@@ -1,4 +1,4 @@
-namespace RISKSandboxUtility
+namespace RISKHackTool
 {
     internal static class Program
     {

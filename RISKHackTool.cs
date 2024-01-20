@@ -115,7 +115,7 @@ namespace RISKHackTool
                 ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
                 String color = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
-                if (!playerColorsToAddresses.ContainsKey(color.Replace("color_", "")))
+                if (!IntPtr.Zero.Equals(playerAddress) && !playerColorsToAddresses.ContainsKey(color.Replace("color_", "")))
                 {
                     playerColorsToAddresses.Add(color.Replace("color_", ""), playerAddress);
                 }

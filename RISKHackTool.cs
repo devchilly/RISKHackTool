@@ -269,22 +269,32 @@ namespace RISKHackTool
 
         private void SetTroopsButton_Click(object sender, EventArgs e)
         {
-            var territoryName = ((Button)sender).Name.Split("_")[0];
-            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox(
+            String territoryName = ((Button)sender).Name.Split("_")[0];
+            String troopCountStr = Microsoft.VisualBasic.Interaction.InputBox(
                 "How many troops would you like on " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(territoryName) + "?",
                 "Set Troops",
-                ""));
-            SetTroops(territoryName, troopCount);
+                "");
+
+            int troopCount;
+            if (int.TryParse(troopCountStr, out troopCount))
+            {
+                SetTroops(territoryName, troopCount);
+            }
         }
 
         private void SetPlayerTroopsButton_Click(object sender, EventArgs e)
         {
-            var playerColor = ((Button)sender).Name.Split("_")[0];
-            var troopCount = int.Parse(Microsoft.VisualBasic.Interaction.InputBox(
+            String playerColor = ((Button)sender).Name.Split("_")[0];
+            String troopCountStr = Microsoft.VisualBasic.Interaction.InputBox(
                 "How many troops would you like for the " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(playerColor) + " player?",
                 "Set Troops",
-                ""));
-            SetPlayerTroops(playerColor, troopCount);
+                "");
+
+            int troopCount;
+            if (int.TryParse(troopCountStr, out troopCount))
+            {
+                SetPlayerTroops(playerColor, troopCount);
+            }
         }
 
         private void SetTroops(String territoryName, int troopCount)
@@ -325,13 +335,11 @@ namespace RISKHackTool
             openFileDialog.FilterIndex = 0;
             openFileDialog.RestoreDirectory = true;
 
-            if (openFileDialog.ShowDialog() != DialogResult.OK)
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                return;
+                String selectedFileName = openFileDialog.FileName;
+                parseCsv(selectedFileName);
             }
-
-            String selectedFileName = openFileDialog.FileName;
-            parseCsv(selectedFileName);
         }
 
         private void parseCsv(String fileName)

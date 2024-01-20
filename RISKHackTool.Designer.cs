@@ -85,7 +85,6 @@ namespace RISKHackTool
 
         private List<TextBox> territoryTextBoxes;
         private List<List<Button>> territoryButtons;
-        private Button button1;
         private Button loadCsvButton;
         private Panel playersPanel;
     }

@@ -33,9 +33,6 @@ namespace RISKHackTool
         {
             InitializeComponent();
 
-            territoryTextBoxes = new List<TextBox>();
-            territoryButtons = new List<List<Button>>();
-
             GetRISKData();
             SetRISKDataInComponent();
 
@@ -177,13 +174,14 @@ namespace RISKHackTool
             terrtoryTextBox.ReadOnly = true;
             terrtoryTextBox.TabStop = false;
 
-            setTroopsButton.BackgroundImage = Properties.Resources.TroopsImage;
+            setTroopsButton.BackgroundImage = Properties.Resources.SwordImage;
             setTroopsButton.BackgroundImageLayout = ImageLayout.Stretch;
             setTroopsButton.Location = new Point(172, 15 + 30 * index);
             setTroopsButton.Name = territoryName + "_Troops_Button";
             setTroopsButton.Size = new Size(32, 23);
             setTroopsButton.UseVisualStyleBackColor = true;
             setTroopsButton.Click += SetTroopsButton_Click;
+            territorySetTroopsToolTip.SetToolTip(setTroopsButton, "Set troop count on the territory");
 
             setCapitalButton.BackgroundImage = Properties.Resources.CapitalImage;
             setCapitalButton.BackgroundImageLayout = ImageLayout.Stretch;
@@ -195,7 +193,7 @@ namespace RISKHackTool
 
             setBlizzardButton.BackgroundImage = Properties.Resources.BlizzardImage;
             setBlizzardButton.BackgroundImageLayout = ImageLayout.Stretch;
-            setBlizzardButton.Location = new Point(249, 15 + 30 * index);
+            setBlizzardButton.Location = new Point(248, 15 + 30 * index);
             setBlizzardButton.Name = territoryName + "_Blizzard_Button";
             setBlizzardButton.Size = new Size(32, 23);
             setBlizzardButton.UseVisualStyleBackColor = true;
@@ -205,9 +203,6 @@ namespace RISKHackTool
             territoriesPanel.Controls.Add(setTroopsButton);
             territoriesPanel.Controls.Add(setCapitalButton);
             territoriesPanel.Controls.Add(setBlizzardButton);
-
-            territoryTextBoxes.Add(terrtoryTextBox);
-            territoryButtons.Add(new List<Button>() { setTroopsButton, setCapitalButton, setBlizzardButton });
         }
 
         private void AddPlayerInTool(string playerColor, int index)
@@ -215,6 +210,7 @@ namespace RISKHackTool
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKHack));
             TextBox playerTextBox = new TextBox();
             Button setTroopsButton = new Button();
+            Button viewPlayerCardsButton = new Button();
 
             playerTextBox.BackColor = SystemColors.Control;
             playerTextBox.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
@@ -225,16 +221,26 @@ namespace RISKHackTool
             playerTextBox.ReadOnly = true;
             playerTextBox.TabStop = false;
 
-            setTroopsButton.BackgroundImage = Properties.Resources.TroopsImage;
+            setTroopsButton.BackgroundImage = Properties.Resources.SwordImage;
             setTroopsButton.BackgroundImageLayout = ImageLayout.Stretch;
             setTroopsButton.Location = new Point(172, 15 + 30 * index);
             setTroopsButton.Name = playerColor + "_Troops_Button";
             setTroopsButton.Size = new Size(32, 23);
             setTroopsButton.UseVisualStyleBackColor = true;
             setTroopsButton.Click += SetPlayerTroopsButton_Click;
+            playerSetTroopsToolTip.SetToolTip(setTroopsButton, "Set troops in the player's hand");
+
+            viewPlayerCardsButton.BackgroundImage = Properties.Resources.SpadeImage;
+            viewPlayerCardsButton.BackgroundImageLayout = ImageLayout.Stretch;
+            viewPlayerCardsButton.Location = new Point(210, 15 + 30 * index);
+            viewPlayerCardsButton.Name = playerColor + "_ViewCards_Button";
+            viewPlayerCardsButton.Size = new Size(32, 23);
+            viewPlayerCardsButton.UseVisualStyleBackColor = true;
+            //viewPlayerCardsButton.Click += SetPlayerTroopsButton_Click;
 
             playersPanel.Controls.Add(playerTextBox);
             playersPanel.Controls.Add(setTroopsButton);
+            playersPanel.Controls.Add(viewPlayerCardsButton);
         }
 
         private void SetCapitalButton_Click(object sender, EventArgs e)

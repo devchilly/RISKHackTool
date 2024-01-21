@@ -83,9 +83,19 @@ namespace RISKHackTool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap TroopsImage {
+        internal static System.Drawing.Bitmap SpadeImage {
             get {
-                object obj = ResourceManager.GetObject("TroopsImage", resourceCulture);
+                object obj = ResourceManager.GetObject("SpadeImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SwordImage {
+            get {
+                object obj = ResourceManager.GetObject("SwordImage", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

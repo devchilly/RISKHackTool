@@ -32,10 +32,13 @@ namespace RISKHackTool
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             territoriesPanel = new Panel();
             loadCsvButton = new Button();
             playersPanel = new Panel();
+            playerSetTroopsToolTip = new ToolTip(components);
+            territorySetTroopsToolTip = new ToolTip(components);
             SuspendLayout();
             // 
             // territoriesPanel
@@ -82,10 +85,9 @@ namespace RISKHackTool
         #endregion
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private Panel territoriesPanel;
-
-        private List<TextBox> territoryTextBoxes;
-        private List<List<Button>> territoryButtons;
         private Button loadCsvButton;
         private Panel playersPanel;
+        private ToolTip playerSetTroopsToolTip;
+        private ToolTip territorySetTroopsToolTip;
     }
 }

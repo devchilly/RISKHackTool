@@ -63,6 +63,26 @@ namespace RISKHackTool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AnyTroopImage {
+            get {
+                object obj = ResourceManager.GetObject("AnyTroopImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ArtilleryImage {
+            get {
+                object obj = ResourceManager.GetObject("ArtilleryImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap BlizzardImage {
             get {
                 object obj = ResourceManager.GetObject("BlizzardImage", resourceCulture);
@@ -76,6 +96,26 @@ namespace RISKHackTool.Properties {
         internal static System.Drawing.Bitmap CapitalImage {
             get {
                 object obj = ResourceManager.GetObject("CapitalImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CavalryImage {
+            get {
+                object obj = ResourceManager.GetObject("CavalryImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap InfantryImage {
+            get {
+                object obj = ResourceManager.GetObject("InfantryImage", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

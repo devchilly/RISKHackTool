@@ -1,30 +1,22 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using RISKHackTool.src;
+using RISKHackTool.src.PlayerCardsForm;
 
 namespace RISKHackTool
 {
     public partial class RISKHack : Form
     {
-        [DllImport("kernel32.dll")]
-        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer,
-            int dwSize, out IntPtr lpNumberOfBytesRead);
-
-        [DllImport("kernel32.dll")]
-        static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer,
-            int dwSize, out IntPtr lpNumberOfBytesRead);
-
-        const int MAX_BUFFER_SIZE = 100;
-        const int MAX_SCROLL_SIZE = 5000;
 
         Dictionary<String, IntPtr> territoryNamesToAdresses = new Dictionary<String, IntPtr>();
         IntPtr addrOfTerritoriesList = IntPtr.Zero;
         int sizeOfTerritoriesList = 0;
 
-        Dictionary<String, IntPtr> playerColorsToAddresses = new Dictionary<String, IntPtr>(); // we will use this to set territory colors
+        Dictionary<String, IntPtr> playerColorsToAddresses = new Dictionary<String, IntPtr>();
         Dictionary<String, IntPtr> regionNamesToAddresses = new Dictionary<String, IntPtr>(); // for now not used but extra information
 
-        byte[] buffer = new byte[MAX_BUFFER_SIZE];
+        byte[] buffer = new byte[Constants.MAX_BUFFER_SIZE];
         IntPtr bytesRead = IntPtr.Zero;
 
         Process riskProcess;
@@ -38,11 +30,11 @@ namespace RISKHackTool
 
             territoriesPanel.VerticalScroll.Enabled = true;
             territoriesPanel.VerticalScroll.Visible = true;
-            territoriesPanel.VerticalScroll.Maximum = MAX_SCROLL_SIZE;
+            territoriesPanel.VerticalScroll.Maximum = Constants.MAX_SCROLL_SIZE;
 
             playersPanel.VerticalScroll.Enabled = true;
             playersPanel.VerticalScroll.Visible = true;
-            playersPanel.VerticalScroll.Maximum = MAX_SCROLL_SIZE;
+            playersPanel.VerticalScroll.Maximum = Constants.MAX_SCROLL_SIZE;
         }
 
         void GetRISKData()
@@ -73,43 +65,61 @@ namespace RISKHackTool
             }
 
             // Get address of the territories list
-            ReadProcessMemory(riskProcess.Handle, gameAssemblyDllProc.BaseAddress + 0x27DF308, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-            ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + 0xB8, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-            ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()), buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-            ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + 0x30, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, gameAssemblyDllProc.BaseAddress + 0x27DF308, 
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + 0xB8, 
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()), 
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + 0x30, 
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
             addrOfTerritoriesList = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
             // Get address of each territory, as well as the regions and players (at least by color for the player)
-            ReadProcessMemory(riskProcess.Handle, addrOfTerritoriesList + TerritoriesListOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, addrOfTerritoriesList + TerritoriesListOffsets.SIZE_OFFSET, 
+                buffer, MemoryConstants.INT_BYTES, out bytesRead);
             sizeOfTerritoriesList = BitConverter.ToInt32(buffer);
 
             for (int i = 0; i < sizeOfTerritoriesList; ++i)
             {
                 // get territory names and addresses
-                buffer = new byte[MAX_BUFFER_SIZE];
-                ReadProcessMemory(riskProcess.Handle, addrOfTerritoriesList + i * MemoryConstants.POINTER_BYTES + TerritoriesListOffsets.FIRST_TERRITORY_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                buffer = new byte[Constants.MAX_BUFFER_SIZE];
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    addrOfTerritoriesList + i * MemoryConstants.POINTER_BYTES + TerritoriesListOffsets.FIRST_TERRITORY_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr territoryAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.TERRITORY_INFO_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-                ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + TerritoryInfoOffsets.NAME_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.TERRITORY_INFO_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + TerritoryInfoOffsets.NAME_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr territoryNameAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead);
-                ReadProcessMemory(riskProcess.Handle, territoryNameAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + StringOffsets.SIZE_OFFSET, 
+                    buffer, MemoryConstants.INT_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryNameAddress + StringOffsets.FIRST_CHAR_OFFSET, 
+                    buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
                 String territoryName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 territoryNamesToAdresses.Add(territoryName, territoryAddress);
 
                 // check if we have seen this player before and add to list if needed
-                buffer = new byte[MAX_BUFFER_SIZE];
-                ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.PLAYER_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                buffer = new byte[Constants.MAX_BUFFER_SIZE];
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.PLAYER_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr playerAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + PlayerOffsets.COLOR_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + PlayerOffsets.COLOR_OFFSET, buffer, 
+                    MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr colorAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead);
-                ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.SIZE_OFFSET,
+                    buffer, MemoryConstants.INT_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET, 
+                    buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
                 String color = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 if (!IntPtr.Zero.Equals(playerAddress) && !playerColorsToAddresses.ContainsKey(color.Replace("color_", "")))
@@ -118,16 +128,23 @@ namespace RISKHackTool
                 }
 
                 // check if we have seen this region before and add to list if needed
-                buffer = new byte[MAX_BUFFER_SIZE];
-                ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.REGION_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                buffer = new byte[Constants.MAX_BUFFER_SIZE];
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.REGION_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr regionAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + RegionOffsets.REGION_INFO_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-                ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + RegionInfoOffsets.NAME_OFFSET, buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + RegionOffsets.REGION_INFO_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + RegionInfoOffsets.NAME_OFFSET, 
+                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
                 IntPtr regionNameAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
-                ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.SIZE_OFFSET, buffer, MemoryConstants.INT_BYTES, out bytesRead); // memory is stored as ascii and not unicode
-                ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.FIRST_CHAR_OFFSET, buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.SIZE_OFFSET, 
+                    buffer, MemoryConstants.INT_BYTES, out bytesRead); // memory is stored as ascii and not unicode
+                HelperFunctions.ReadProcessMemory(riskProcess.Handle, regionNameAddress + StringOffsets.FIRST_CHAR_OFFSET,
+                    buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
                 String regionName = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
 
                 if (!regionNamesToAddresses.ContainsKey(regionName))
@@ -159,7 +176,7 @@ namespace RISKHackTool
         private void AddTerritoryInTool(string territoryName, int index)
         {
 
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKHack));
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(RISKHack));
             TextBox terrtoryTextBox = new TextBox();
             Button setTroopsButton = new Button();
             Button setCapitalButton = new Button();
@@ -207,7 +224,7 @@ namespace RISKHackTool
 
         private void AddPlayerInTool(string playerColor, int index)
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RISKHack));
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(RISKHack));
             TextBox playerTextBox = new TextBox();
             Button setTroopsButton = new Button();
             Button viewPlayerCardsButton = new Button();
@@ -236,7 +253,7 @@ namespace RISKHackTool
             viewPlayerCardsButton.Name = playerColor + "_ViewCards_Button";
             viewPlayerCardsButton.Size = new Size(32, 23);
             viewPlayerCardsButton.UseVisualStyleBackColor = true;
-            //viewPlayerCardsButton.Click += SetPlayerTroopsButton_Click;
+            viewPlayerCardsButton.Click += PlayerCardsButton_Click;
 
             playersPanel.Controls.Add(playerTextBox);
             playersPanel.Controls.Add(setTroopsButton);
@@ -252,7 +269,7 @@ namespace RISKHackTool
         private void SetCapital(String territoryName)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
                 BitConverter.GetBytes((int)TerritoryType.Capital), MemoryConstants.INT_BYTES, out bytesRead);
         }
 
@@ -265,11 +282,11 @@ namespace RISKHackTool
         private void SetBlizzard(String territoryName)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
                 BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
                 BitConverter.GetBytes(IntPtr.Zero.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
                 BitConverter.GetBytes((int)TerritoryType.Blizzard), MemoryConstants.INT_BYTES, out bytesRead);
         }
 
@@ -303,17 +320,24 @@ namespace RISKHackTool
             }
         }
 
+        private void PlayerCardsButton_Click(object sender, EventArgs args)
+        {
+            String playerColor = ((Button)sender).Name.Split("_")[0];
+            var test = new PlayerCardsForm(playerColor, playerColorsToAddresses[playerColor], riskProcess);
+            test.ShowDialog();
+        }
+
         private void SetTroops(String territoryName, int troopCount)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.ENCRYPTED_UNITS_OFFSET,
                 BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
         private void SetPlayerTroops(String playerColor, int troopCount)
         {
             IntPtr playerPtr = playerColorsToAddresses[playerColor];
-            WriteProcessMemory(riskProcess.Handle, playerPtr + PlayerOffsets.PLACEABLE_TROOPS_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, playerPtr + PlayerOffsets.PLACEABLE_TROOPS_OFFSET,
                 BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
@@ -321,14 +345,14 @@ namespace RISKHackTool
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
             IntPtr playerPtr = playerColorsToAddresses[color];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.PLAYER_OFFSET,
                 BitConverter.GetBytes(playerPtr.ToInt64()), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
         private void SetRegularTerritory(String territoryName)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
-            WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, territoryPtr + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
                 BitConverter.GetBytes((int)TerritoryType.Regular), MemoryConstants.INT_BYTES, out bytesRead);
         }
 

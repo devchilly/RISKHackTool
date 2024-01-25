@@ -77,6 +77,8 @@ namespace RISKHackTool
             Controls.Add(playersPanel);
             Controls.Add(loadCsvButton);
             Controls.Add(territoriesPanel);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "RISKHack";
             Text = "RISK Hack ";
             ResumeLayout(false);

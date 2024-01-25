@@ -69,6 +69,7 @@ namespace RISKHackTool.src.PlayerCardsForm
                 cardTroopPanel.BorderStyle = BorderStyle.FixedSingle;
                 cardTroopPanel.Location = new Point(21 + i * 110, 35);
                 cardTroopPanel.Size = new Size(94, 94);
+                cardTroopPanel.Name = "card_troop_panel_" + i.ToString();
 
                 cardComboBox.FormattingEnabled = true;
                 cardComboBox.Items.AddRange(new object[] { CardType.Any, CardType.Infantry, 
@@ -114,8 +115,16 @@ namespace RISKHackTool.src.PlayerCardsForm
 
         private void SetCardTypeComboBox_IndexChanged(object sender, EventArgs e)
         {
-            int cardIndex = int.Parse(((ComboBox)sender).Name.Split("_")[1]);
-            return;
+            ComboBox cardComboBox = (ComboBox)sender;
+            int cardIndex = int.Parse(cardComboBox.Name.Split("_")[1]);
+
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, playerCardAddrs[cardIndex] + CardOffsets.CARD_TYPE_OFFSET,
+                BitConverter.GetBytes(cardComboBox.SelectedIndex), MemoryConstants.INT_BYTES, out bytesRead);
+
+            Panel cardTroopPanel = (Panel)this.Controls.Find("card_troop_panel_" + cardIndex.ToString(), true)[0];
+            cardTroopPanel.BackgroundImage = GetCardBackGroundImageForComboBox(cardComboBox.SelectedIndex);
+            this.Update();
         }
     }
 }

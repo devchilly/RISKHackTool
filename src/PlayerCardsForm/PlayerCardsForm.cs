@@ -26,12 +26,12 @@ namespace RISKHackTool.src.PlayerCardsForm
         public PlayerCardsForm(String playerColor, IntPtr playerAddr, Process riskProcess)
         {
             InitializeComponent();
-            this.Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(playerColor) + " Player's Cards";
+            Text = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(playerColor) + " Player's Cards";
             this.riskProcess = riskProcess;
             this.playerColor = playerColor;
             HelperFunctions.ReadProcessMemory(riskProcess.Handle, playerAddr + PlayerOffsets.CARD_LIST_OFFSET,
                 buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-            this.playerCardListAddr = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
+            playerCardListAddr = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
 
             GetPlayerCards();
             SetPlayerCardsInForm();
@@ -82,8 +82,8 @@ namespace RISKHackTool.src.PlayerCardsForm
                 cardComboBox.SelectedIndex = cardComboBoxIndex;
                 cardComboBox.SelectedIndexChanged += SetCardTypeComboBox_IndexChanged;
 
-                this.Controls.Add(cardTroopPanel);
-                this.Controls.Add(cardComboBox);
+                Controls.Add(cardTroopPanel);
+                Controls.Add(cardComboBox);
             }
         }
 
@@ -122,9 +122,9 @@ namespace RISKHackTool.src.PlayerCardsForm
             HelperFunctions.WriteProcessMemory(riskProcess.Handle, playerCardAddrs[cardIndex] + CardOffsets.CARD_TYPE_OFFSET,
                 BitConverter.GetBytes(cardComboBox.SelectedIndex), MemoryConstants.INT_BYTES, out bytesRead);
 
-            Panel cardTroopPanel = (Panel)this.Controls.Find("card_troop_panel_" + cardIndex.ToString(), true)[0];
+            Panel cardTroopPanel = (Panel)Controls.Find("card_troop_panel_" + cardIndex.ToString(), true)[0];
             cardTroopPanel.BackgroundImage = GetCardBackGroundImageForComboBox(cardComboBox.SelectedIndex);
-            this.Update();
+            Update();
         }
     }
 }

@@ -39,6 +39,7 @@ namespace RISKHackTool
             playersPanel = new Panel();
             playerSetTroopsToolTip = new ToolTip(components);
             territorySetTroopsToolTip = new ToolTip(components);
+            refreshButton = new Button();
             SuspendLayout();
             // 
             // territoriesPanel
@@ -69,11 +70,24 @@ namespace RISKHackTool
             playersPanel.Size = new Size(313, 138);
             playersPanel.TabIndex = 4;
             // 
+            // refreshButton
+            // 
+            refreshButton.FlatStyle = FlatStyle.System;
+            refreshButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            refreshButton.Location = new Point(260, 205);
+            refreshButton.Name = "refreshButton";
+            refreshButton.Size = new Size(65, 23);
+            refreshButton.TabIndex = 5;
+            refreshButton.Text = "Refresh";
+            refreshButton.UseVisualStyleBackColor = true;
+            refreshButton.Click += refreshButton_Click;
+            // 
             // RISKHack
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(340, 621);
+            Controls.Add(refreshButton);
             Controls.Add(playersPanel);
             Controls.Add(loadCsvButton);
             Controls.Add(territoriesPanel);
@@ -91,5 +105,6 @@ namespace RISKHackTool
         private Panel playersPanel;
         private ToolTip playerSetTroopsToolTip;
         private ToolTip territorySetTroopsToolTip;
+        private Button refreshButton;
     }
 }

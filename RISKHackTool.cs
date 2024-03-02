@@ -1,8 +1,13 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
 using RISKHackTool.src;
 using RISKHackTool.src.PlayerCardsForm;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Button = System.Windows.Forms.Button;
+using TextBox = System.Windows.Forms.TextBox;
 
 namespace RISKHackTool
 {
@@ -35,6 +40,13 @@ namespace RISKHackTool
             playersPanel.VerticalScroll.Enabled = true;
             playersPanel.VerticalScroll.Visible = true;
             playersPanel.VerticalScroll.Maximum = Constants.MAX_SCROLL_SIZE;
+
+            backgroundWorker.DoWork += BackgroundWorker_DoWork;
+            backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.WorkerSupportsCancellation = true;
+            backgroundWorker.RunWorkerAsync();
         }
 
         void GetRISKData()
@@ -65,7 +77,7 @@ namespace RISKHackTool
             }
 
             // Get address of the territories list
-            HelperFunctions.ReadProcessMemory(riskProcess.Handle, gameAssemblyDllProc.BaseAddress + 0x27DF308,
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, gameAssemblyDllProc.BaseAddress + 0x27506C0,
                 buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
             HelperFunctions.ReadProcessMemory(riskProcess.Handle, IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + 0xB8,
                 buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
@@ -106,21 +118,8 @@ namespace RISKHackTool
                 territoryNamesToAdresses.Add(territoryName, territoryAddress);
 
                 // check if we have seen this player before and add to list if needed
-                buffer = new byte[Constants.MAX_BUFFER_SIZE];
-                HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryAddress + TerritoryOffsets.PLAYER_OFFSET,
-                    buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
-                IntPtr playerAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
-
-                HelperFunctions.ReadProcessMemory(riskProcess.Handle,
-                    IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + PlayerOffsets.COLOR_OFFSET, buffer,
-                    MemoryConstants.POINTER_BYTES, out bytesRead);
-                IntPtr colorAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
-
-                HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.SIZE_OFFSET,
-                    buffer, MemoryConstants.INT_BYTES, out bytesRead);
-                HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET,
-                    buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
-                String color = System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
+                IntPtr playerAddress = GetPlayerAddrFromTerritoryAddr(territoryAddress);
+                String color = GetColorFromPlayerAddr(playerAddress);
 
                 if (!IntPtr.Zero.Equals(playerAddress) && !playerColorsToAddresses.ContainsKey(color.Replace("color_", "")))
                 {
@@ -207,6 +206,12 @@ namespace RISKHackTool
             setCapitalButton.Size = new Size(32, 23);
             setCapitalButton.UseVisualStyleBackColor = true;
             setCapitalButton.Click += SetCapitalButton_Click;
+            if (IsTerritoryACapital(territoryName))
+            {
+                setCapitalButton.BackgroundImage = null;
+                //setCapitalButton.BackColor = Color.Gold;
+                //setCapitalButton.ForeColor = Color.Gold;
+            }
 
             setBlizzardButton.BackgroundImage = Properties.Resources.BlizzardImage;
             setBlizzardButton.BackgroundImageLayout = ImageLayout.Stretch;
@@ -341,6 +346,74 @@ namespace RISKHackTool
                 BitConverter.GetBytes(troopCount), MemoryConstants.POINTER_BYTES, out bytesRead);
         }
 
+        private IntPtr GetPlayerAddrFromTerritoryAddr(IntPtr territoryAddr)
+        {
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryAddr + TerritoryOffsets.PLAYER_OFFSET,
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            return IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
+        }
+        
+        private String GetColorFromPlayerAddr(IntPtr playerAddr)
+        {
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, playerAddr + PlayerOffsets.COLOR_OFFSET, buffer,
+                    MemoryConstants.POINTER_BYTES, out bytesRead);
+            IntPtr colorAddress = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
+
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.SIZE_OFFSET,
+                buffer, MemoryConstants.INT_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, colorAddress + StringOffsets.FIRST_CHAR_OFFSET,
+                buffer, BitConverter.ToInt32(buffer) * 2, out bytesRead); // memory is stored as ascii and not unicode
+            return System.Text.Encoding.ASCII.GetString(buffer.Where(x => x != 0x00).ToArray()).ToLower();
+        }
+
+        private Color GetColorForTerritoryTextBox(String territoryName)
+        {
+            IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
+            IntPtr playerPtr = GetPlayerAddrFromTerritoryAddr(territoryPtr);
+            if (playerPtr == IntPtr.Zero)
+            {
+                return Color.Empty;
+            }
+
+            String color = GetColorFromPlayerAddr(playerPtr);
+
+            Color rtnColor = Color.Empty;
+            switch (color.Split('_')[1])
+            {
+                case "blue":
+                    rtnColor = Color.DeepSkyBlue;
+                    break;
+                case "red":
+                    rtnColor = Color.FromArgb(237, 60, 36);
+                    break;
+                case "orange":
+                    rtnColor = Color.Orange;
+                    break;
+                case "yellow":
+                    rtnColor = Color.Yellow;
+                    break;
+                case "pink":
+                    rtnColor = Color.HotPink;
+                    break;
+                case "black":
+                    rtnColor = Color.SlateGray;
+                    break;
+                case "white":
+                    rtnColor = Color.White;
+                    break;
+                case "royale":
+                    rtnColor = Color.MediumPurple;
+                    break;
+                case "green":
+                    rtnColor = Color.LawnGreen;
+                    break;
+            }
+
+            return rtnColor;
+        }
+
         private void SetColor(String territoryName, String color)
         {
             IntPtr territoryPtr = territoryNamesToAdresses[territoryName];
@@ -412,8 +485,48 @@ namespace RISKHackTool
             }
         }
 
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker helperBW = sender as BackgroundWorker;
+            bool flag = false;
+            while (!helperBW.CancellationPending)
+            {
+                Thread.Sleep(100);
+                helperBW.ReportProgress(Convert.ToInt32(flag));
+                flag = !flag;
+            }
+
+            e.Cancel = true;
+        }
+
+        private void BackgroundWorker_ProgressChanged(object? sender, ProgressChangedEventArgs e)
+        {
+            foreach (String key in territoryNamesToAdresses.Keys)
+            {
+              TextBox territoryTextBox = (TextBox)Controls.Find(key + "_TextBox", true)[0];
+                territoryTextBox.BackColor = GetColorForTerritoryTextBox(key);
+            }
+            Update();
+        }
+
+        private bool IsTerritoryACapital(String territoryName)
+        {
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryNamesToAdresses[territoryName] + TerritoryOffsets.TERRITORY_TYPE_OFFSET, 
+                buffer, MemoryConstants.INT_BYTES, out bytesRead);
+            int territoryType = BitConverter.ToInt32(buffer);
+
+            return territoryType == (int)TerritoryType.Capital;
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
+        {
+            backgroundWorker.RunWorkerAsync(); // automitically restart on complete.
+        }
+
         private void refreshButton_Click(object sender, EventArgs e)
         {
+            backgroundWorker.CancelAsync();
             territoriesPanel.Controls.Clear();
             playersPanel.Controls.Clear();
             territoryNamesToAdresses.Clear();

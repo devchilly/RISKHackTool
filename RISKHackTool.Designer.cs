@@ -33,7 +33,7 @@ namespace RISKHackTool
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            backgroundWorker = new System.ComponentModel.BackgroundWorker();
             territoriesPanel = new Panel();
             loadCsvButton = new Button();
             playersPanel = new Panel();
@@ -99,7 +99,7 @@ namespace RISKHackTool
         }
 
         #endregion
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
         private Panel territoriesPanel;
         private Button loadCsvButton;
         private Panel playersPanel;

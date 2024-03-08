@@ -110,7 +110,7 @@ namespace RISKHackTool
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "RISKHack";
-            Text = "RISK Hack ";
+            Text = "RISK Hack v1.2.0";
             ResumeLayout(false);
         }
 

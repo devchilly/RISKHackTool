@@ -58,6 +58,7 @@ namespace RISKHackTool
             Process[] riskProcs = Process.GetProcessesByName("Risk");
             if (riskProcs.Length != 1)
             {
+                MessageBox.Show("Please start RISK application :)");
                 throw new Exception("Risk process not detected or more than 1 instance has been detected.");
             }
             riskProcess = riskProcs[0];

@@ -89,6 +89,7 @@ namespace RISKHackTool.src
 
     public static class MemoryConstants
     {
+        public const int BOOLEAN_BYTES = 0x1;
         public const int INT_BYTES = 0x4;
         public const int POINTER_BYTES = 0x8;
     }

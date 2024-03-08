@@ -41,6 +41,7 @@ namespace RISKHackTool
             territorySetTroopsToolTip = new ToolTip(components);
             refreshButton = new Button();
             toggleFogButton = new Button();
+            toggleFogToolTip = new ToolTip(components);
             SuspendLayout();
             // 
             // territoriesPanel
@@ -92,6 +93,7 @@ namespace RISKHackTool
             toggleFogButton.Size = new Size(75, 23);
             toggleFogButton.TabIndex = 6;
             toggleFogButton.Text = "Toggle Fog";
+            toggleFogToolTip.SetToolTip(toggleFogButton, "Toggle fog for yourself only. This will not affect other players!");
             toggleFogButton.UseVisualStyleBackColor = true;
             toggleFogButton.Click += toggleFogButton_Click;
             // 
@@ -121,5 +123,6 @@ namespace RISKHackTool
         private ToolTip territorySetTroopsToolTip;
         private Button refreshButton;
         private Button toggleFogButton;
+        private ToolTip toggleFogToolTip;
     }
 }

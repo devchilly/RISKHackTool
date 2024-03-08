@@ -553,12 +553,13 @@ namespace RISKHackTool
             buffer = new byte[Constants.MAX_BUFFER_SIZE];
             HelperFunctions.ReadProcessMemory(riskProcess.Handle,
                 gameManagerConfigsPtr + GameManagerConfigOffsets.FOG_ENABLED_OFFSET,
-                buffer, MemoryConstants.INT_BYTES, out bytesRead);
+                buffer, MemoryConstants.BOOLEAN_BYTES, out bytesRead);
 
-            bool enableFog = !Convert.ToBoolean(BitConverter.ToInt64(buffer));
+            bool enableFog = BitConverter.ToBoolean(buffer);
+            var test = BitConverter.GetBytes(enableFog);
             HelperFunctions.WriteProcessMemory(riskProcess.Handle, 
                 gameManagerConfigsPtr + GameManagerConfigOffsets.FOG_ENABLED_OFFSET,
-                BitConverter.GetBytes(enableFog), MemoryConstants.INT_BYTES, out bytesRead);
+                BitConverter.GetBytes(!enableFog), MemoryConstants.BOOLEAN_BYTES, out bytesRead);
         }
     }
 }

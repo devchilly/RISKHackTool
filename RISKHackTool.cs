@@ -25,6 +25,7 @@ namespace RISKHackTool
         IntPtr bytesRead = IntPtr.Zero;
 
         Process riskProcess;
+        ProcessModule? gameAssemblyDllProc;
 
         public RISKHack()
         {
@@ -62,7 +63,7 @@ namespace RISKHackTool
             riskProcess = riskProcs[0];
 
             // get GameAssembly.dll process
-            ProcessModule? gameAssemblyDllProc = null;
+            gameAssemblyDllProc = null;
             foreach (ProcessModule module in riskProcess.Modules)
             {
                 if (module.FileName != null && module.FileName.Contains("GameAssembly.dll"))
@@ -353,7 +354,7 @@ namespace RISKHackTool
                 buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
             return IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
         }
-        
+
         private String GetColorFromPlayerAddr(IntPtr playerAddr)
         {
             buffer = new byte[Constants.MAX_BUFFER_SIZE];
@@ -503,7 +504,7 @@ namespace RISKHackTool
         {
             foreach (String key in territoryNamesToAdresses.Keys)
             {
-              TextBox territoryTextBox = (TextBox)Controls.Find(key + "_TextBox", true)[0];
+                TextBox territoryTextBox = (TextBox)Controls.Find(key + "_TextBox", true)[0];
                 territoryTextBox.BackColor = GetColorForTerritoryTextBox(key);
             }
             Update();
@@ -512,7 +513,7 @@ namespace RISKHackTool
         private bool IsTerritoryACapital(String territoryName)
         {
             buffer = new byte[Constants.MAX_BUFFER_SIZE];
-            HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryNamesToAdresses[territoryName] + TerritoryOffsets.TERRITORY_TYPE_OFFSET, 
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, territoryNamesToAdresses[territoryName] + TerritoryOffsets.TERRITORY_TYPE_OFFSET,
                 buffer, MemoryConstants.INT_BYTES, out bytesRead);
             int territoryType = BitConverter.ToInt32(buffer);
 
@@ -536,6 +537,28 @@ namespace RISKHackTool
             GetRISKData();
             SetRISKDataInComponent();
             Update();
+        }
+
+        private void toggleFogButton_Click(object sender, EventArgs e)
+        {
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                gameAssemblyDllProc.BaseAddress + BaseOffsets.GAME_MANAGER_OFFSET,
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle, 
+                IntPtr.Parse(BitConverter.ToInt64(buffer).ToString()) + GameManagerOffsets.CONFIG_OFFSET,
+                buffer, MemoryConstants.POINTER_BYTES, out bytesRead);
+
+            IntPtr gameManagerConfigsPtr = IntPtr.Parse(BitConverter.ToInt64(buffer).ToString());
+            buffer = new byte[Constants.MAX_BUFFER_SIZE];
+            HelperFunctions.ReadProcessMemory(riskProcess.Handle,
+                gameManagerConfigsPtr + GameManagerConfigOffsets.FOG_ENABLED_OFFSET,
+                buffer, MemoryConstants.INT_BYTES, out bytesRead);
+
+            bool enableFog = !Convert.ToBoolean(BitConverter.ToInt64(buffer));
+            HelperFunctions.WriteProcessMemory(riskProcess.Handle, 
+                gameManagerConfigsPtr + GameManagerConfigOffsets.FOG_ENABLED_OFFSET,
+                BitConverter.GetBytes(enableFog), MemoryConstants.INT_BYTES, out bytesRead);
         }
     }
 }

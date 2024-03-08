@@ -40,6 +40,7 @@ namespace RISKHackTool
             playerSetTroopsToolTip = new ToolTip(components);
             territorySetTroopsToolTip = new ToolTip(components);
             refreshButton = new Button();
+            toggleFogButton = new Button();
             SuspendLayout();
             // 
             // territoriesPanel
@@ -53,7 +54,7 @@ namespace RISKHackTool
             // 
             // loadCsvButton
             // 
-            loadCsvButton.Location = new Point(15, 205);
+            loadCsvButton.Location = new Point(15, 176);
             loadCsvButton.Name = "loadCsvButton";
             loadCsvButton.Size = new Size(75, 23);
             loadCsvButton.TabIndex = 4;
@@ -82,11 +83,24 @@ namespace RISKHackTool
             refreshButton.UseVisualStyleBackColor = true;
             refreshButton.Click += refreshButton_Click;
             // 
+            // toggleFogButton
+            // 
+            toggleFogButton.FlatStyle = FlatStyle.System;
+            toggleFogButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            toggleFogButton.Location = new Point(15, 205);
+            toggleFogButton.Name = "toggleFogButton";
+            toggleFogButton.Size = new Size(75, 23);
+            toggleFogButton.TabIndex = 6;
+            toggleFogButton.Text = "Toggle Fog";
+            toggleFogButton.UseVisualStyleBackColor = true;
+            toggleFogButton.Click += toggleFogButton_Click;
+            // 
             // RISKHack
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(340, 621);
+            Controls.Add(toggleFogButton);
             Controls.Add(refreshButton);
             Controls.Add(playersPanel);
             Controls.Add(loadCsvButton);
@@ -106,5 +120,6 @@ namespace RISKHackTool
         private ToolTip playerSetTroopsToolTip;
         private ToolTip territorySetTroopsToolTip;
         private Button refreshButton;
+        private Button toggleFogButton;
     }
 }

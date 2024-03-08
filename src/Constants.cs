@@ -6,10 +6,25 @@ using System.Threading.Tasks;
 
 namespace RISKHackTool.src
 {
+    public static class BaseOffsets
+    {
+        public const int GAME_MANAGER_OFFSET = 0x2715CF8;
+    }
+
     public static class Constants
     {
         public const int MAX_BUFFER_SIZE = 100;
         public const int MAX_SCROLL_SIZE = 5000;
+    }
+
+    public static class GameManagerOffsets
+    {
+        public const int CONFIG_OFFSET = 0xB8;
+    }
+
+    public static class GameManagerConfigOffsets
+    {
+        public const int FOG_ENABLED_OFFSET = 0x16;
     }
 
     public static class TerritoriesListOffsets
@@ -100,5 +115,10 @@ namespace RISKHackTool.src
         Infantry = 1,
         Calvary = 2,
         Artillery = 3
+    }
+
+    enum FogConfig
+    {
+        Disabled = 0
     }
 }
